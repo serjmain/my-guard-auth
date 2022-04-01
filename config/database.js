@@ -3,7 +3,7 @@ const { Client } = require("cassandra-driver");
 module.exports = new Client({
     keyspace: "auth",
     cloud: {
-        secureConnectBundle: "../secure-connect-authmyguard.zip",
+        secureConnectBundle: "./secure-connect-authmyguard.zip",
     },
     credentials: {
         username: "ciTZeBCKIrRxSaHzWTGRxjSe",
