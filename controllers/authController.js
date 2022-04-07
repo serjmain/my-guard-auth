@@ -10,7 +10,7 @@ module.exports = {
     async registration(req, res) {
         const role = 'USER';
         const { email, password, name } = req.body;
-        const { data: { id, error } } = await userService.registration({ email, password, name })        
+        const { data: { id, error } } = await userService.registration({ email, password, name })            
 
         if (error) {
             return res.status(400).json(error);
@@ -28,7 +28,7 @@ module.exports = {
         const { accessToken, refreshToken } = tokenService.createToken({ id, role });
 
         res.cookie('token', refreshToken, { httpOnly: true });        
-        await authRepository.saveUserToken(id, refreshToken, role);
+        await authRepository.saveUserToken(id, accessToken, refreshToken, role);
         res.status(200).send({ accessToken, refreshToken });
     },
 
@@ -53,23 +53,25 @@ module.exports = {
         }
         const { accessToken, refreshToken } = tokenService.createToken({ id: user.userid, role: user.role });
 
-        // await authRepository.clearUserTokens(user.userid);
-        await authRepository.saveUserToken(user.userid, refreshToken, role = user.role);
+        await authRepository.clearUserTokens(user.userid);
+        res.cookie('token', refreshToken, { httpOnly: true });
+        await authRepository.saveUserToken(user.userid, accessToken, refreshToken, role = user.role);
         res.status(200).send({ accessToken, refreshToken });
     },
 
-    async logout(req, res) {
-        const authHeader = req.headers.authorization;
-        const data = await jwt.verify(authHeader.split(' ')[1], secret.refreshKey);
+    async logout(req, res) {        
+        const authHeader = req.headers.authorization;        
+        const data = await jwt.verify(authHeader.split(' ')[1], secret.accessKey);               
 
         await authRepository.clearUserTokens(data.id);
         res.status(200).json({ message: 'successfully logout' })
     },
 
     async refresh(req, res) {
-        let cookieToken = req.headers.cookie
-        let result = cookieToken.replace(/^.{6}/, '');
-        const item = await authRepository.getByToken(result);
+        const cookieToken = req.headers.cookie
+        const result = cookieToken.replace(/^.{6}/, '');        
+        
+        const item = await authRepository.getByToken(result);        
 
         if (!item) {
             return res.status(404).json({ message: 'not auth' });
@@ -78,7 +80,7 @@ module.exports = {
         const { accessToken, refreshToken } = tokenService.createToken({ id: item.id, role: item.role });
 
         await authRepository.clearUserTokens(item.id);
-        await authRepository.saveUserToken(item.id, refreshToken, item.role);
+        await authRepository.saveUserToken(item.id, accessToken, refreshToken, item.role);
         res.status(200).send({ accessToken, refreshToken });
     }
 }

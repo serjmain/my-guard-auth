@@ -28,11 +28,10 @@ module.exports = {
         })               
     },
 
+    async saveUserToken(userId, accessToken, refreshToken, role) {
+        const query = `INSERT INTO ${this.TABLE} (id, userId, accessToken, refreshToken, role) VALUES(now(), ?,?,?,?) IF NOT EXISTS`;
 
-    async saveUserToken(userId, refreshToken, role) {
-        const query = `INSERT INTO ${this.TABLE} (id, userId, refreshToken, role) VALUES(now(), ?,?,?) IF NOT EXISTS`;
-
-        return queryHelper.process(query, { userId, refreshToken, role });
+        return queryHelper.process(query, { userId, accessToken, refreshToken, role });
     },    
 
     async clearUserTokens(userId) {
