@@ -53,7 +53,7 @@ module.exports = {
         }
         const { accessToken, refreshToken } = tokenService.createToken({ id: user.userid, role: user.role });
 
-        await authRepository.clearUserTokens(user.userid);
+        // await authRepository.clearUserTokens(user.userid);
         await authRepository.saveUserToken(user.userid, refreshToken, role = user.role);
         res.status(200).send({ accessToken, refreshToken });
     },

@@ -6,17 +6,17 @@ const authRouter = express.Router();
  * @swagger
  * components:
  *   securitySchemes:
- *     BearerAuth:
+ *     bearerAuth:
  *      type: http
  *      scheme: bearer
  *      bearerFormat: JWT
  *   schemas:
- *      User:
+ *      UserAuth:
  *        type: object
  *        required:
- *            - id
  *            - email
  *            - password
+ *            - name
  *        properties:
  *            email:
  *              type: string
@@ -31,36 +31,44 @@ const authRouter = express.Router();
  *            email: 1258@gmail.com
  *            password: ehhwetj651he
  *            name: Gleb
-  *      LoginResponce:
+ *      registrationResponce:
  *        type: object
  *        required:
- *            - id
- *            - email
- *            - password
+ *            - accessToken
+ *            - refreshToken
+ *            - userId
+ *            - role
  *        properties:
- *            email:
+ *            accessToken:
  *              type: string
- *              description: User email
- *            password:
+ *              description: accessToken
+ *            refreshToken:
  *              type: string
- *              description: User password *            
+ *              description: refreshToken
+ *            userId: 
+ *              type: string
+ *              description: user id
+ *            role:
+ *              type: string
+ *              description: role      
+ *                        
  *        example:
  *            email: 1258@gmail.com
  *            password: ehhwetj651he             
  *      Token:
  *        type: object
  *        required:
- *            - id
+ *            - accessToken
  *            - refreshToken
  *        properties:
- *            id:
- *              type: uuid
- *              description: User id
+ *            accessToken:
+ *              type: text
+ *              description: accessToken
  *            refreshToken:
  *              type: string
- *              description: User refresh token
+ *              description: refreshToken
  *        example:
- *            id: a155cac0-a85a-11ec-9fcd-657971076650
+ *            accessToken: a155cac0-a85a-11ec-9fcd-657971076650
  *            refreshToken: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6IjEyM0BnbWFpbC5jb20iLCJpYXQiOjE2NDc3ODY3NzQsImV4cCI6MTY1MDM3ODc3NH0.-iI2u4xFIcXOnyc6lM_MlLx1DqHnu27DlIWwkRDPTHc
  */
 
@@ -83,10 +91,14 @@ const authRouter = express.Router();
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/User'
+ *             $ref: '#/components/schemas/UserAuth'
  *     responses:
  *       200:
  *         description: User has been registered
+ *         content: 
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/registrationResponce'
  *       500:
  *         description: Server error
  */
@@ -105,14 +117,14 @@ authRouter.post('/registration', authController.registration);
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/LoginResponce'
+ *             $ref: '#/components/schemas/UserAuth'
  *     responses:
  *       200:
  *         description: User has been login
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/LoginResponce'
+ *               $ref: '#/components/schemas/registrationResponce'
  *       500:
  *         description: Server error
  */
@@ -123,29 +135,44 @@ authRouter.post('/login', authController.login);
  * /auth/logout:
  *   post:
  *     summary: Logout user
- *     security: 
+ *     security:
  *       - bearerAuth: []
  *     tags: [Auth]
  *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/LoginResponce'
- *     responses:
- *       200:
- *         description: User has been login
+ *         required: true
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/LoginResponce'
+ *               $ref: '#/components/schemas/UserAuth'       
+ *     responses:
+ *       200:
+ *         description: User has been login         
  *       500:
  *         description: Server error
  */
 
-authRouter.post('/logout', authController.logout);
-authRouter.get('/users', authController.getUsers);
+ authRouter.post('/logout', authController.logout);
+
+/**
+ * @swagger
+ * /auth/refresh:
+ *   get:
+ *     summary: Refresh token
+ *     security:
+ *       - bearerAuth: []
+ *     tags: [Auth]   
+ *     responses:
+ *       200:
+ *         description: take new refresh token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Token'
+ *       500:
+ *         description: Server error
+ */
 authRouter.get('/refresh', authController.refresh);
 
+authRouter.get('/users', authController.getUsers);
 
 module.exports = authRouter;

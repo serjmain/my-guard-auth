@@ -9,10 +9,7 @@
       "servers": [
         {
           "url": "http://localhost:5000"        
-        },
-        {
-          "url": "https://"        
-        }
+        }        
       ]
     },
     "apis": ["./routes/*.js"]
