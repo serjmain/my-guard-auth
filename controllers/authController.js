@@ -96,9 +96,9 @@ module.exports = {
         const checkedToken = await authRepository.checkToken(accessToken); 
 
         if (checkedToken === undefined || checkedToken.accesstoken !== accessToken ) {
-            return res.status(200).json({ message: 'token is not active' })
+            return res.status(200).json({ message: 'false' })
         }
 
-        res.status(200).json({ message: 'token is valid' })
+        res.status(200).json({ message: 'true' })
     }
 }
