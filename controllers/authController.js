@@ -89,12 +89,16 @@ module.exports = {
 
     async check(req, res) { 
         const { accessToken } = req.query; 
+        
+        if (accessToken === undefined ) {
+            return res.status(400).json({ message: 'you didn\'t specify a token' })
+        }
         const checkedToken = await authRepository.checkToken(accessToken); 
 
         if (checkedToken === undefined || checkedToken.accesstoken !== accessToken ) {
-            return res.status(400).json({ message: 'token is not active' })
+            return res.status(200).json({ message: 'token is not active' })
         }
 
-        res.status(200).send({ message: 'token is valid' })
+        res.status(200).json({ message: 'token is valid' })
     }
 }
