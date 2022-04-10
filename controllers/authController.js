@@ -60,7 +60,10 @@ module.exports = {
     },
 
     async logout(req, res) {        
-        const authHeader = req.headers.authorization;        
+        const authHeader = req.headers.authorization;
+        if (!authHeader) {
+            return res.status(401).json({ message: 'not auth' });
+        }       
         const data = await jwt.verify(authHeader.split(' ')[1], secret.accessKey);               
 
         await authRepository.clearUserTokens(data.id);
@@ -74,7 +77,7 @@ module.exports = {
         const item = await authRepository.getByToken(result);        
 
         if (!item) {
-            return res.status(404).json({ message: 'not auth' });
+            return res.status(401).json({ message: 'not auth' });
         }
 
         const { accessToken, refreshToken } = tokenService.createToken({ id: item.id, role: item.role });
@@ -82,5 +85,16 @@ module.exports = {
         await authRepository.clearUserTokens(item.id);
         await authRepository.saveUserToken(item.id, accessToken, refreshToken, item.role);
         res.status(200).send({ accessToken, refreshToken });
+    },
+
+    async check(req, res) { 
+        const { accessToken } = req.query; 
+        const checkedToken = await authRepository.checkToken(accessToken); 
+
+        if (checkedToken === undefined || checkedToken.accesstoken !== accessToken ) {
+            return res.status(400).json({ message: 'token is not active' })
+        }
+
+        res.status(200).send({ message: 'token is valid' })
     }
 }

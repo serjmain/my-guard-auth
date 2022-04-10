@@ -47,4 +47,11 @@ module.exports = {
         
         return queryHelper.process(query, undefined, undefined, true);
     },
+    
+    async checkToken(accessToken) {
+        const params = accessToken;
+        const query = `SELECT * FROM ${this.TABLE} WHERE accessToken = '${accessToken}' ALLOW FILTERING`;
+        
+        return queryHelper.process(query, params, undefined, true);
+    }
 }
