@@ -24,10 +24,10 @@ module.exports = {
         
         const hashPassword = bcrypt.hashSync(password, 7);
         const candidate = await userRepository.getByEmail(email);
+
         if (candidate) {
             return res.status(400).json({ message: 'user with this email already exist'})
-        }
-        
+        }        
 
         await userRepository.saveUser(id, email, hashPassword);
 
