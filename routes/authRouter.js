@@ -1,6 +1,7 @@
 const express = require('express');
 const authController = require('../controllers/authController');
 const authRouter = express.Router();
+const { check } = require ('express-validator');
 
 /**
  * @swagger
@@ -27,6 +28,22 @@ const authRouter = express.Router();
  *            name:
  *              type: string
  *              description: User name
+ *        example:
+ *            email: 1258@gmail.com
+ *            password: ehhwetj651he
+ *            name: Genadiy
+ *      Login:
+ *        type: object
+ *        required:
+ *            - email
+ *            - password
+ *        properties:
+ *            email:
+ *              type: string
+ *              description: User email
+ *            password:
+ *              type: string
+ *              description: User password
  *        example:
  *            email: 1258@gmail.com
  *            password: ehhwetj651he            
@@ -109,11 +126,19 @@ const authRouter = express.Router();
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/registrationResponce'
+ *       400:
+ *         description: Bad Request
  *       500:
  *         description: Server error
  */
 
-authRouter.post('/registration', authController.registration);
+authRouter.post('/registration', [
+    check('email', 'email field can\'t be empty').notEmpty(),
+    check('email', 'email must be longer than 6 and shorter than 14 characters').isLength({ min: 6, max: 14 }),
+    check('password', 'password field can\'t be empty').notEmpty(),
+    check('password', 'password must be longer than 4 and shorter than 14 characters').isLength({ min: 4, max: 14 }),
+    check('name', 'email field can\'t be empty').notEmpty()
+], authController.registration);
 
 /**
  * @swagger
@@ -127,7 +152,7 @@ authRouter.post('/registration', authController.registration);
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/UserAuth'
+ *             $ref: '#/components/schemas/Login'
  *     responses:
  *       200:
  *         description: User has been login
@@ -135,10 +160,15 @@ authRouter.post('/registration', authController.registration);
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/registrationResponce'
+ *       400:
+ *         description: Bad Request
  *       500:
  *         description: Server error
  */
-authRouter.post('/login', authController.login);
+authRouter.post('/login', [
+    check('email', 'email field can\'t be empty').notEmpty(),
+    check('password', 'password field can\'t be empty').notEmpty()
+], authController.login);
 
 /**
  * @swagger
@@ -147,16 +177,12 @@ authRouter.post('/login', authController.login);
  *     summary: Logout user
  *     security:
  *       - bearerAuth: []
- *     tags: [Auth]
- *     requestBody:
- *         required: true
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/UserAuth'       
+ *     tags: [Auth]       
  *     responses:
  *       200:
- *         description: User has been login         
+ *         description: User has been login
+ *       401:
+ *         description: Access denied         
  *       500:
  *         description: Server error
  */
@@ -178,6 +204,8 @@ authRouter.post('/login', authController.login);
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Token'
+ *       401:
+ *         description: Access denied
  *       500:
  *         description: Server error
  */

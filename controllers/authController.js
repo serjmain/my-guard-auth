@@ -5,9 +5,15 @@ const userService = require('../service/requestService');
 const secret = require('../config/secretkey');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const { validationResult } = require('express-validator');
 
 module.exports = {
     async registration(req, res) {
+        const errors = validationResult(req);
+
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ message: 'registration error', errors})
+        }
         const role = 'USER';
         const { email, password, name } = req.body;
         const { data: { id, error } } = await userService.registration({ email, password, name })            
@@ -40,16 +46,21 @@ module.exports = {
     },
 
     async login(req, res) {
+        const errors = validationResult(req);
+        
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ message: 'login error', errors})
+        }
         const { email, password } = req.body;
-        const user = await userRepository.getByEmail(email);
+        const user = await userRepository.getByEmail(email);        
 
         if (!user) {
-            return res.status(400).json("OPS WRONG EMAIL");
+            return res.status(400).json({ message: "this email does not exist" });
         }
         const resultPass = await bcrypt.compare(password, user.password);
 
         if (!resultPass) {
-            return res.status(400).json("OPS WRONG PASSWORD");
+            return res.status(400).json({ message: "OPS WRONG PASSWORD" });
         }
         const { accessToken, refreshToken } = tokenService.createToken({ id: user.userid, role: user.role });
 
@@ -62,7 +73,7 @@ module.exports = {
     async logout(req, res) {        
         const authHeader = req.headers.authorization;
         if (!authHeader) {
-            return res.status(401).json({ message: 'not auth' });
+            return res.status(401).json({ message: 'user is not authorized' });
         }       
         const data = await jwt.verify(authHeader.split(' ')[1], secret.accessKey);               
 
@@ -77,7 +88,7 @@ module.exports = {
         const item = await authRepository.getByToken(result);        
 
         if (!item) {
-            return res.status(401).json({ message: 'not auth' });
+            return res.status(401).json({ message: 'user is not authorized' });
         }
 
         const { accessToken, refreshToken } = tokenService.createToken({ id: item.id, role: item.role });
