@@ -98,7 +98,23 @@ module.exports = {
         res.status(200).send({ accessToken, refreshToken });
     },
 
-    async check(req, res) { 
+    async check(req, res) {
+        const header = req.headers.authorization; 
+        
+        if (header === undefined ) {
+            return res.status(401).json({ message: 'user is not authorized' })
+        }
+        const item = header.split(' ')[1]
+        const checkedToken = await authRepository.checkToken(item); 
+        
+        if (checkedToken === undefined || checkedToken.accesstoken !== item ) {
+            return res.status(200).json({ message: 'false' })
+        }
+
+        res.status(200).json({ message: 'true' })
+    },
+
+    /* async check(req, res) {
         const { accessToken } = req.query; 
         
         if (accessToken === undefined ) {
@@ -111,5 +127,5 @@ module.exports = {
         }
 
         res.status(200).json({ message: 'true' })
-    }
+    } */
 }

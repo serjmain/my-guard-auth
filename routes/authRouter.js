@@ -180,7 +180,7 @@ authRouter.post('/login', [
  *     tags: [Auth]       
  *     responses:
  *       200:
- *         description: User has been login
+ *         description: User has been logout
  *       401:
  *         description: Access denied         
  *       500:
@@ -216,16 +216,14 @@ authRouter.get('/refresh', authController.refresh);
  * /auth/check:
  *   get:
  *     summary: check 
- *     security: []
- *     tags: [Auth]
- *     parameters:
- *     - in: query
- *       description: check accessToken
- *       name: accessToken
- *       type: string       
+ *     security: 
+ *       - bearerAuth: []
+ *     tags: [Auth]            
  *     responses:
  *       200:
- *         description: token status         
+ *         description: token status
+ *       400:
+ *         description: Bad Request         
  *       500:
  *         description: Server error
  */
